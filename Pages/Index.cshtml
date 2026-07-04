@@ -1,0 +1,82 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Anlık Hava Durumu";
+}
+
+<div class="weather-page">
+    <div class="app-container">
+
+        <div class="app-header">
+            <div class="logo">🌤️</div>
+            <h1>Hava Durumu</h1>
+            <p>Şehir, ilçe veya bölge adı girerek anlık hava durumunu öğren.</p>
+        </div>
+
+        <form method="post" class="search-card">
+            <label class="form-label">Konum Ara</label>
+
+            <div class="search-row">
+                <input asp-for="City"
+                       class="form-control"
+                       placeholder="Örn: Istanbul, Kadikoy, Ankara" />
+
+                <button type="submit" class="search-button">
+                    Ara
+                </button>
+            </div>
+        </form>
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="error-card">
+                @Model.ErrorMessage
+            </div>
+        }
+
+        @if (Model.Temperature != null)
+        {
+            <div class="weather-card">
+
+                <div class="location">
+                    <h2>📍 @Model.CityName</h2>
+                    <p>@Model.Region @Model.Country</p>
+                </div>
+
+                <div class="main-weather">
+                    <div class="weather-icon">@Model.WeatherIcon</div>
+                    <div class="temperature">@Model.Temperature°C</div>
+                    <div class="description">@Model.WeatherText</div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-box">
+                        <span>🌡️</span>
+                        <p>Hissedilen</p>
+                        <strong>@Model.FeelsLike°C</strong>
+                    </div>
+
+                    <div class="info-box">
+                        <span>💧</span>
+                        <p>Nem</p>
+                        <strong>%@Model.Humidity</strong>
+                    </div>
+
+                    <div class="info-box">
+                        <span>💨</span>
+                        <p>Rüzgar</p>
+                        <strong>@Model.WindSpeed km/s</strong>
+                    </div>
+
+                    <div class="info-box">
+                        <span>🕒</span>
+                        <p>Güncellendi</p>
+                        <strong>@Model.UpdateTime</strong>
+                    </div>
+                </div>
+
+            </div>
+        }
+
+    </div>
+</div>
