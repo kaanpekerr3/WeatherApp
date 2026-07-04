@@ -1,6 +1,6 @@
 # 🌤 WeatherApp
 
-ASP.NET Core Razor Pages kullanılarak geliştirilmiş anlık hava durumu uygulaması.
+ASP.NET Core Razor Pages kullanılarak geliştirilmiş anlık hava durumu uygulaması yapmaya çalıştım.
 
 ## 🚀 Özellikler
 
