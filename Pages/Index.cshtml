@@ -1,10 +1,13 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Anlık Hava Durumu";
+    ViewData["Title"] = "Hava Durumu";
 }
 
-<div class="weather-page">
+<div class="weather-page @Model.BackgroundClass">
+
+    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+
     <div class="app-container">
 
         <div class="app-header">
@@ -13,11 +16,12 @@
             <p>Şehir, ilçe veya bölge adı girerek anlık hava durumunu öğren.</p>
         </div>
 
-        <form method="post" class="search-card">
+        <form method="post" class="search-card" onsubmit="saveSearch()">
             <label class="form-label">Konum Ara</label>
 
             <div class="search-row">
                 <input asp-for="City"
+                       id="cityInput"
                        class="form-control"
                        placeholder="Örn: Istanbul, Kadikoy, Ankara" />
 
@@ -25,6 +29,8 @@
                     Ara
                 </button>
             </div>
+
+            <div id="recentSearches" class="recent-searches"></div>
         </form>
 
         @if (!string.IsNullOrEmpty(Model.ErrorMessage))
@@ -76,7 +82,84 @@
                 </div>
 
             </div>
+
+            <div class="forecast-card">
+                <h3>📅 7 Günlük Tahmin</h3>
+
+                <div class="forecast-grid">
+                    @foreach (var day in Model.Forecast)
+                    {
+                        <div class="forecast-box">
+                            <div class="forecast-date">@day.Date</div>
+                            <div class="forecast-icon">@day.Icon</div>
+                            <div class="forecast-text">@day.Text</div>
+                            <div class="forecast-temp">
+                                <strong>@day.MaxTemp°C</strong>
+                                <span>@day.MinTemp°C</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
         }
 
     </div>
 </div>
+
+<script>
+    function saveSearch() {
+        const input = document.getElementById("cityInput");
+        const city = input.value.trim();
+
+        if (!city) return;
+
+        let searches = JSON.parse(localStorage.getItem("recentSearches")) || [];
+
+        searches = searches.filter(x => x.toLowerCase() !== city.toLowerCase());
+        searches.unshift(city);
+        searches = searches.slice(0, 5);
+
+        localStorage.setItem("recentSearches", JSON.stringify(searches));
+    }
+
+    function loadSearches() {
+        const container = document.getElementById("recentSearches");
+        if (!container) return;
+
+        const searches = JSON.parse(localStorage.getItem("recentSearches")) || [];
+
+        if (searches.length === 0) {
+            container.innerHTML = "";
+            return;
+        }
+
+        container.innerHTML = "<p>Son aramalar:</p>" + searches.map(city =>
+            `<button type="button" onclick="selectCity('${city}')">${city}</button>`
+        ).join("");
+    }
+
+    function selectCity(city) {
+        document.getElementById("cityInput").value = city;
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle("dark-mode");
+
+        if (document.body.classList.contains("dark-mode")) {
+            localStorage.setItem("theme", "dark");
+        } else {
+            localStorage.setItem("theme", "light");
+        }
+    }
+
+    function loadTheme() {
+        const theme = localStorage.getItem("theme");
+
+        if (theme === "dark") {
+            document.body.classList.add("dark-mode");
+        }
+    }
+
+    loadTheme();
+    loadSearches();
+</script>
