@@ -6,14 +6,14 @@
 
 <div class="weather-page @Model.BackgroundClass">
 
-    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Tema değiştir">🌙</button>
 
     <div class="app-container">
 
         <div class="app-header">
-            <div class="logo">🌤️</div>
+            <div class="logo">🌦️</div>
             <h1>Hava Durumu</h1>
-            <p>Şehir, ilçe veya bölge adı girerek anlık hava durumunu öğren.</p>
+            <p>Şehir, ilçe veya bölge adı girerek güncel hava durumunu öğren.</p>
         </div>
 
         <form method="post" class="search-card" onsubmit="saveSearch()">
@@ -30,7 +30,14 @@
                 </button>
             </div>
 
+            <div class="button-row">
+                <button type="button" class="small-action-button" onclick="addFavorite()">
+                    ⭐ Favorilere Ekle
+                </button>
+            </div>
+
             <div id="recentSearches" class="recent-searches"></div>
+            <div id="favoriteCities" class="favorite-cities"></div>
         </form>
 
         @if (!string.IsNullOrEmpty(Model.ErrorMessage))
@@ -50,7 +57,7 @@
                 </div>
 
                 <div class="main-weather">
-                    <div class="weather-icon">@Model.WeatherIcon</div>
+                    <div class="weather-icon big-icon">@Model.WeatherIcon</div>
                     <div class="temperature">@Model.Temperature°C</div>
                     <div class="description">@Model.WeatherText</div>
                 </div>
@@ -75,12 +82,76 @@
                     </div>
 
                     <div class="info-box">
+                        <span>🧭</span>
+                        <p>Rüzgar Yönü</p>
+                        <strong>@Model.WindDirectionText</strong>
+                    </div>
+
+                    <div class="info-box">
+                        <span>🌅</span>
+                        <p>Gün Doğumu</p>
+                        <strong>@Model.Sunrise</strong>
+                    </div>
+
+                    <div class="info-box">
+                        <span>🌇</span>
+                        <p>Gün Batımı</p>
+                        <strong>@Model.Sunset</strong>
+                    </div>
+
+                    <div class="info-box">
+                        <span>☀️</span>
+                        <p>UV İndeksi</p>
+                        <strong>@Model.UvIndex</strong>
+                    </div>
+
+                    <div class="info-box">
+                        <span>🌧️</span>
+                        <p>Yağış İhtimali</p>
+                        <strong>%@Model.RainProbability</strong>
+                    </div>
+
+                    <div class="info-box">
+                        <span>🌬️</span>
+                        <p>Basınç</p>
+                        <strong>@Model.Pressure hPa</strong>
+                    </div>
+
+                    <div class="info-box">
+                        <span>☁️</span>
+                        <p>Bulutluluk</p>
+                        <strong>%@Model.CloudCover</strong>
+                    </div>
+
+                    <div class="info-box">
+                        <span>💦</span>
+                        <p>Yağış</p>
+                        <strong>@Model.Precipitation mm</strong>
+                    </div>
+
+                    <div class="info-box">
                         <span>🕒</span>
                         <p>Güncellendi</p>
                         <strong>@Model.UpdateTime</strong>
                     </div>
                 </div>
 
+            </div>
+
+            <div class="forecast-card">
+                <h3>🕒 Saatlik Tahmin</h3>
+
+                <div class="hourly-scroll">
+                    @foreach (var hour in Model.HourlyForecasts)
+                    {
+                        <div class="hourly-box">
+                            <div class="hour-time">@hour.Time</div>
+                            <div class="hour-icon">@hour.Icon</div>
+                            <div class="hour-temp">@hour.Temp°C</div>
+                            <div class="hour-rain">🌧️ %@hour.RainProbability</div>
+                        </div>
+                    }
+                </div>
             </div>
 
             <div class="forecast-card">
@@ -138,6 +209,41 @@
         ).join("");
     }
 
+    function addFavorite() {
+        const input = document.getElementById("cityInput");
+        const city = input.value.trim();
+
+        if (!city) {
+            alert("Önce şehir adı yaz.");
+            return;
+        }
+
+        let favorites = JSON.parse(localStorage.getItem("favoriteCities")) || [];
+
+        favorites = favorites.filter(x => x.toLowerCase() !== city.toLowerCase());
+        favorites.unshift(city);
+        favorites = favorites.slice(0, 8);
+
+        localStorage.setItem("favoriteCities", JSON.stringify(favorites));
+        loadFavorites();
+    }
+
+    function loadFavorites() {
+        const container = document.getElementById("favoriteCities");
+        if (!container) return;
+
+        const favorites = JSON.parse(localStorage.getItem("favoriteCities")) || [];
+
+        if (favorites.length === 0) {
+            container.innerHTML = "";
+            return;
+        }
+
+        container.innerHTML = "<p>Favoriler:</p>" + favorites.map(city =>
+            `<button type="button" onclick="selectCity('${city}')">⭐ ${city}</button>`
+        ).join("");
+    }
+
     function selectCity(city) {
         document.getElementById("cityInput").value = city;
     }
@@ -162,4 +268,5 @@
 
     loadTheme();
     loadSearches();
+    loadFavorites();
 </script>
